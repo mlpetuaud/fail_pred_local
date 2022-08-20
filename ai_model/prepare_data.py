@@ -4,8 +4,19 @@ import pandas as pd
 # retrieve data (custom module)
 from get_data import get_dataset_db, get_naf_db
 
+"""This file holds all functions used to transform the dataset retrieved from the SQL database to a 
+DataFrame having format and information needed to feed the training ML SkLearn pipeline
+"""
 
 def suppr_nulls_nans(df):
+    """This function drops rows and columns holding too much null data to be used for training purpose
+
+    Args:
+        df (pandas.DataFrame): df hoding the dataset
+
+    Returns:
+        df (pandas.DataFrame): df hoding the dataset after some nulls and nan values removal
+    """
     # suppression des entreprises avec CA null
     df = df[df["Chiffre d'affaires net (Total) (FL) 2018 (€)"] > 0]
     # suppression des colonnes avec plus de 12% de NaN (sauf tranche d'effectif)
@@ -22,6 +33,16 @@ def suppr_nulls_nans(df):
 
 
 def merge_naf_v2(df, df_naf):
+    """This function performs a left join between dataset and a table holding a sectorial mapping table
+        in order to change sectorial granularity
+
+    Args:
+        df (pandas.DataFrame): dataframe holding the dataset
+        df_naf (pandas.DataFrame): dataframe holding a mapping table between different sectorial granularity levels
+
+    Returns:
+        df (pandas.DataFrame): merged df
+    """
     merged_df = pd.merge(df, df_naf, how = 'left', left_on = df['Code APE'], right_on = df_naf['code_ape'])
     merged_df = merged_df.drop(['key_0'], axis=1)
     assert merged_df.shape[0]==df.shape[0]
@@ -30,6 +51,14 @@ def merge_naf_v2(df, df_naf):
 
 
 def remove_useless_cols_db(df):
+    """This function drops some columns from DataFrame that are not relevant for a failure prediction purpose
+
+    Args:
+        df (pandas.DataFrame): dataframe holding the dataset
+
+    Returns:
+        df (pandas.DataFrame): dataframe holding the dataset
+    """
     useless_cols = [
         "Dénomination",
         "Ville",
@@ -57,11 +86,29 @@ def remove_useless_cols_db(df):
     return df
 
 def apply_categorical_dtypes(df):
+    """This function converts 2 columns (Catégorie juridique (Niveau II) and a_21) of the input DataFrame into category dtypes
+
+    Args:
+        df (pandas.DataFrame) holding the dataset
+
+    Returns:
+        df (pandas.DataFrame) holding the dataset
+    """
     df = df.astype({"Catégorie juridique (Niveau II)" : 'category', 
                             'a_21' : 'category'})
     return df
 
 def remove_outliers(df, col):
+    """This function removes outliers from a df's column.
+    Outliers are values exceeding (above and underneath) 20 times the column's standard deviation 
+
+    Args:
+        df (pandas.DataFrame): df holding the dataset
+        col (str): name of the column to be considered
+
+    Returns:
+        _type_: _description_
+    """
     mean = np.mean(df[col], axis=0)
     sd = np.std(df[col], axis=0)
     minimum = mean - 20 * sd
@@ -69,7 +116,16 @@ def remove_outliers(df, col):
     df = df.loc[(df[col] > minimum) & (df[col] < maximum)]
     return df
 
+#----MAIN----
 def prepare_dataset_db():
+    """This function is the main function of this module.
+    It gets all information needed in the SQL database and then
+    performs every transformation needed to the dataframe 
+    in order to push the output DataFrame into a preprocessing and model-fitting SKlearn pipeline
+
+    Returns:
+        pandas.DataFrame: df holding all information in the appropriate format to be an input for the model pipeline
+    """
     df = get_dataset_db() # 132 cols including target
     df = suppr_nulls_nans(df) # drops 6 cols => 126 cols
     df_naf = get_naf_db() 

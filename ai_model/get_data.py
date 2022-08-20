@@ -2,13 +2,22 @@
 import pandas as pd
 # DB connection
 import sqlalchemy
-# retrieve env variables
-import sys, os
-#from ..database_creation import get_env_variables
+
+"""This file is used to retrieve datasets needed to train failure prediction ML model from a PostgreSQL database
+"""
 
 DATABASE_URI = "postgresql://marie@localhost:5432/fail_prediction"
 
-def get_dataset_db():
+def get_dataset_db(DATABASE_URI = "postgresql://marie@localhost:5432/fail_prediction"):
+    """Gets a df holding the dataset used to perform failure prediction (french companies accounts of year 2018) from a PostgreSQL database
+
+    Args:
+        DATABASE_URI (str, optional): URI of database with format as follow : f"postgresql://{DB_USERNAME}@{DB_ADDRESS}:{DB_PORT}/{DB_NAME}"
+        Defaults to "postgresql://marie@localhost:5432/fail_prediction".
+
+    Returns:
+        pandas.DataFrame: df holding the dataset used to perform failure prediction (french companies accounts of year 2018 - 132 columns including the target)
+    """
     dataset_cols = ['SIREN',
                  'Dénomination',
                  'SIRET',
@@ -148,6 +157,16 @@ def get_dataset_db():
     return df_dataset
 
 def get_naf_db(DATABASE_URI = "postgresql://marie@localhost:5432/fail_prediction"):
+    """Gets a df holding mapping table to convert sectors codes into différent granularity levels
+    from a PostrgreSQL database
+
+    Args:
+        DATABASE_URI (str, optional): URI of database with format as follow : f"postgresql://{DB_USERNAME}@{DB_ADDRESS}:{DB_PORT}/{DB_NAME}"
+        Defaults to "postgresql://marie@localhost:5432/fail_prediction".
+
+    Returns:
+        pandas.DataFrame: df holding mapping table to convert sectors codes into différent granularity levels
+    """
     engine = sqlalchemy.create_engine(DATABASE_URI, echo=True)
     res_naf = engine.execute("SELECT * FROM NAF")
     naf_list = [r for r in res_naf]
