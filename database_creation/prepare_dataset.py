@@ -225,12 +225,6 @@ def get_dataset_dtype_dict(df):
         value=column_data_type
     """
     model_dict = {}
-    mapping_dtypes = {
-        'O' : 'String',
-        'int64': 'BigInteger',
-        'float64': 'Float',
-        '<M8[ns]' : 'DateTime'
-    }
     for col in df.columns.to_list():
         if df[col].dtype == 'int64':
             model_dict[col] = BigInteger
@@ -244,19 +238,31 @@ def get_dataset_dtype_dict(df):
 
 
 def rename_cols(df):
-    """This function 
+    """This function is used to rename columns of the dataset (dataframe)
+        into a database-friendly format (all chars in lowercase and 
+        spaces replaced by underscores)
 
     Args:
-        df (_type_): _description_
+        df (Pandas DataFrame): DataFrame holding columns to be renamed
 
     Returns:
-        _type_: _description_
+        Pandas DataFrame: DataFrame with columns renamed properly
     """
     mapping_cols_names = {col:col.replace(' ', '_').lower() for col in df.columns.to_list()}
     df = df.rename(columns=mapping_cols_names)
     return df
 
 def prepare_naf_df(df):
+    """This function operates minor format transformation to
+     the DataFrame holding NAF information in order to allow 
+     foreign key to be implemented on 'Code APE' column
+
+    Args:
+        df (Pandas DataFrame): NAF DataFrame needing preparation
+
+    Returns:
+        Pandas DataFrame: NAF DataFrame ready for beeing inserted into DB
+    """
     df = df.dropna(axis=1)
     df = df.drop("Unnamed: 22", axis=1)
     df = df.rename(columns={'A 732':'Code APE', 'Unnamed: 1':'Descriptif Code APE'})
