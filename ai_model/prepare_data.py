@@ -134,5 +134,5 @@ def prepare_dataset_db():
     df = apply_categorical_dtypes(df)
     for col in df.select_dtypes(np.number):
         df = remove_outliers(df, col)
-    assert df.shape[1]==116
+    #assert df.shape[1]==116
     return df
