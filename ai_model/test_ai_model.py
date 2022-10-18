@@ -4,10 +4,10 @@ from prepare_data import prepare_dataset_db
 
 import warnings
 
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=UserWarning)
 
-
+### to lauch tests :
+# python -m pytest . 
+# to ignore Warning about lzma : -W ignore::UserWarning
 
 def test_get_dataset_db():
     """Tests the expected # of columns of dataset once retrievd from DB
