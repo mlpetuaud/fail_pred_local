@@ -74,8 +74,8 @@ def fit_model(df, prepro):
     """
     
     # "mlruns/" stands for the default storage method
+    # below line to be run in terminal to lauch gunicorn server :
     # mlflow server --backend-store-uri mlruns/ --default-artifact-root mlruns/ --host 0.0.0.0 --port 5000
-    # conn
 
     # declare mlflow settings
     local_server_uri = "http://0.0.0.0:5000" # set to local server URI
